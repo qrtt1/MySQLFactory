@@ -15,7 +15,7 @@ public class MySQLInstanceTest extends AbsMysqlFactoryTestCase {
     public void testRunSqlScript() throws Exception {
         MySQLInstance instance = manager.createDatabase();
         final String dbName = "test_" + ((int) (Math.random() * 1000));
-        instance.runSqlScript("CREATE DATABASE " + dbName + ";");
+        instance.createDatabase(dbName);
 
         SqlHelper result = new SqlHelper(instance.getBaseConnectionUrl(), "root", instance.getPassword());
         verifyFoundCreatedDatabase(result.exeucteQuery("SHOW DATABASES;"), dbName);

@@ -63,7 +63,7 @@ public class MySQLInstance {
         try {
             waitingDatabaseOnLine();
             setUpPassword();
-            grantExternalNetworkAccess();
+            createNewUser("root", password);
         } catch (Exception e) {
             throw new RuntimeException("Waiting for database timed out.", e);
         }
@@ -77,10 +77,14 @@ public class MySQLInstance {
         manager.invoker.invoke(manager.location(MySQLManager.MYSQL_MYSQLADMIN), args);
     }
     
-    private void grantExternalNetworkAccess() throws Exception {
-        runSqlScript("GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';");
+    public void createNewUser(String account, String passwd) throws Exception {
+        runSqlScript(String.format("GRANT ALL PRIVILEGES ON *.* TO '%s'@'%%' IDENTIFIED BY '%s';", account, passwd));
     }
-
+    
+    public void createDatabase(String name) throws Exception {
+        runSqlScript(String.format("CREATE DATABASE %s DEFAULT CHARACTER SET utf8;", name));
+    }
+    
     private String generatePassword() {
 
         StringBuilder sb = new StringBuilder();
