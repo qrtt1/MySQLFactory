@@ -5,8 +5,8 @@ apply plugin: 'eclipse'
 eclipse.project.name = "MySQLFactory"
 
 project.ext.set("pom.groupId", "org.qty")
-project.ext.set("pom.artifactId", "mysql")
-project.ext.set("pom.version", "0.1")
+project.ext.set("pom.artifactId", "mysql.factory")
+project.ext.set("pom.version", "0.2")
 
 dependencies {
     compile 'commons-logging:commons-logging:1.1.1'
@@ -17,4 +17,9 @@ dependencies {
 
 repositories {
     mavenCentral()
+}
+
+def extra_settings = System.properties['user.home'] + '/.gradle/repo.gradle'
+if (file(extra_settings).exists()) {
+    apply from: extra_settings
 }
