@@ -15,6 +15,7 @@ public class MySQLManager {
     public static final String MYSQL_INSTALL_SCRIPT = "scripts/mysql_install_db";
     public static final String MYSQL_MYSQLD_SAFE = "bin/mysqld_safe";
     public static final String MYSQL_MYSQLADMIN = "bin/mysqladmin";
+    public static final String MYSQL_MYSQL_CLIENT = "bin/mysql";
 
     protected ExternalApplicationInvoker invoker;
     private File mysqlPath;

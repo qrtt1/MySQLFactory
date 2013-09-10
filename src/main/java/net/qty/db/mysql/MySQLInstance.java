@@ -1,6 +1,7 @@
 package net.qty.db.mysql;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -62,17 +63,22 @@ public class MySQLInstance {
         try {
             waitingDatabaseOnLine();
             setUpPassword();
+            grantExternalNetworkAccess();
         } catch (Exception e) {
             throw new RuntimeException("Waiting for database timed out.", e);
         }
-
     }
+
     private void setUpPassword() {
         password = generatePassword();
         String[] args = {String.format("--socket=%s", getSockFile()), 
                 "-u", "root", "password", password};
         
         manager.invoker.invoke(manager.location(MySQLManager.MYSQL_MYSQLADMIN), args);
+    }
+    
+    private void grantExternalNetworkAccess() throws Exception {
+        runSqlScript("GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';");
     }
 
     private String generatePassword() {
@@ -123,6 +129,29 @@ public class MySQLInstance {
 
     public String getBaseConnectionUrl() {
         return String.format("jdbc:mysql://127.0.0.1:%d", getPort());
+    }
+    
+    public void runSqlScript(String sql) throws Exception {
+        String sqlPath = saveInTempFile(sql);
+        String cmd = String.format("%s -uroot -p%s --socket=%s < %s",
+                manager.location(MySQLManager.MYSQL_MYSQL_CLIENT), password, getSockFile(), sqlPath);
+        manager.invoker.delegateInvoke(cmd);
+    }
+
+    private String saveInTempFile(String sql) throws Exception {
+        File file = File.createTempFile(MySQLInstance.class.getSimpleName(), ".tmp");
+        FileWriter fw = new FileWriter(file);
+        fw.write(sql);
+        fw.close();
+        return file.getAbsolutePath();
+    }
+
+    public String getBaseConnectionUrlWithRoot() {
+        return String.format("%s?username=root&password=%s", getBaseConnectionUrl(), password);
+    }
+
+    public String getPassword() {
+        return password;
     }
 
 }
