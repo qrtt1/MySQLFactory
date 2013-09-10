@@ -16,7 +16,7 @@ public class MySQLManager {
     public static final String MYSQL_MYSQLD_SAFE = "bin/mysqld_safe";
     public static final String MYSQL_MYSQLADMIN = "bin/mysqladmin";
 
-    private ExternalApplicationInvoker invoker;
+    protected ExternalApplicationInvoker invoker;
     private File mysqlPath;
     private Set<MySQLInstance> instances = new HashSet<MySQLInstance>();
 
@@ -49,7 +49,7 @@ public class MySQLManager {
         }
     }
 
-    private File location(String executable) {
+    protected File location(String executable) {
         return new File(mysqlPath, executable);
     }
 
@@ -84,11 +84,6 @@ public class MySQLManager {
         return instance;
     }
 
-    protected void shutdownBySocketFile(String sockFile) {
-        invoker.invoke(location(MYSQL_MYSQLADMIN), 
-                String.format("--socket=%s", sockFile), "-u", "root", "shutdown");
-    }
-    
     public void close() {
         for (MySQLInstance instance : instances) {
             try {
