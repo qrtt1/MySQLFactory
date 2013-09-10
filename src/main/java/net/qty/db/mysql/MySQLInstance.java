@@ -36,7 +36,7 @@ public class MySQLInstance {
         return false;
     }
 
-    public String[] getLaunchArgs() {
+    protected String[] getLaunchArgs() {
         return new String[] { 
                 String.format("--datadir=%s", datadir.getAbsoluteFile()),
                 String.format("--port=%d", getPort()),
@@ -52,7 +52,7 @@ public class MySQLInstance {
         return new File(datadir, "my.sock").getAbsolutePath();
     }
     
-    public void waitForDatabaseStarted() {
+    protected void waitForDatabaseStarted() {
         try {
             int count = 15;
             while (count-- > 0) {
@@ -77,7 +77,7 @@ public class MySQLInstance {
             return false;
         }
     }
-
+    
     public void shutdown() {
         manager.shutdownBySocketFile(getSockFile());
     }
