@@ -2,36 +2,15 @@ package net.qty.db.mysql;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-public class MySQLManagerTest {
-
-    private static final File MYSQL_SOFTWARE_PATH = new File("/opt/mysql");
-    
-    static Log logger = LogFactory.getLog(MySQLManagerTest.class);
-
-    MySQLManager manager;
-
-    @Before
-    public void setUp() {
-        manager = new MySQLManager(MYSQL_SOFTWARE_PATH);
-    }
-
-    @After
-    public void tearDown() {
-        manager.close();
-    }
+public class MySQLManagerTest extends AbsMysqlFactoryTestCase {
 
     @Test
     public void testCreateMySQLInstance() throws Exception {
