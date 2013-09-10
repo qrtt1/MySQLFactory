@@ -80,7 +80,7 @@ public class MySQLManager {
     private MySQLInstance launchMySQLInstance(File datadir) {
         MySQLInstance instance = new MySQLInstance(this, datadir);
         invoker.detachableInvoke(location(MYSQL_MYSQLD_SAFE), instance.getLaunchArgs());
-        instance.waitForDatabaseStarted();
+        instance.waitForDatabaseReady();
         return instance;
     }
 

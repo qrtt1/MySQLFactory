@@ -52,22 +52,26 @@ public class MySQLInstance {
         return new File(datadir, "my.sock").getAbsolutePath();
     }
     
-    protected void waitForDatabaseStarted() {
+    protected void waitForDatabaseReady() {
         try {
             int count = 15;
             while (count-- > 0) {
-                if (!testConnect()) {
+                if (!isDatabaseNetworkOn()) {
                     Thread.sleep(1000);
                 } else {
                     break;
                 }
             }
+            if (!isDatabaseNetworkOn()) {
+                throw new RuntimeException("Can not connect to database.");
+            }
         } catch (Exception e) {
             throw new RuntimeException("Waiting for database timed out.", e);
         }
+
     }
 
-    protected boolean testConnect() throws IOException {
+    protected boolean isDatabaseNetworkOn() throws IOException {
         try {
             Socket socket = new Socket();
             socket.connect(new InetSocketAddress(getPort()));
