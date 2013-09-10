@@ -55,4 +55,12 @@ public class SqlHelper {
         return results;
     }
 
+    public Map<String, Object> exeucteOneResultQuery(String sql) throws Exception {
+        ArrayList<Map<String, Object>> result = exeucteQuery(sql);
+        if (result.size() != 1) {
+            throw new RuntimeException("result size is not 1, size: " + result.size());
+        }
+        return result.get(0);
+    }
+
 }
