@@ -82,7 +82,7 @@ public class MySQLInstance {
     }
     
     public void createDatabase(String name) throws Exception {
-        runSqlScript(String.format("CREATE DATABASE %s DEFAULT CHARACTER SET utf8;", name));
+        runSqlScript(String.format("CREATE DATABASE `%s` DEFAULT CHARACTER SET utf8;", name));
     }
     
     private String generatePassword() {
