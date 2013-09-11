@@ -47,7 +47,8 @@ public class MySQLInstance {
         return new String[] { 
                 String.format("--datadir=%s", datadir.getAbsoluteFile()),
                 String.format("--port=%d", getPort()),
-                String.format("--socket=%s", getSockFile())
+                String.format("--socket=%s", getSockFile()),
+                String.format("--thread_stack=%s", "262144")
                 };
     }
 
