@@ -23,6 +23,7 @@ public class MySQLInstance {
         this.manager = manager;
         this.datadir = datadir;
         port = availablePort();
+        logger.info("assign port number: " + port);
     }
 
     private int availablePort() {
@@ -46,10 +47,8 @@ public class MySQLInstance {
     protected String[] getLaunchArgs() {
         return new String[] { 
                 String.format("--datadir=%s", datadir.getAbsoluteFile()),
-                String.format("--port=%d", getPort()),
-                String.format("--socket=%s", getSockFile()),
-                String.format("--thread_stack=%s", "262144")
-                };
+                String.format("--port=%d", getPort()), String.format("--socket=%s", getSockFile()),
+                String.format("--thread_stack=%s", "262144") };
     }
 
     public int getPort() {
@@ -59,7 +58,7 @@ public class MySQLInstance {
     private String getSockFile() {
         return new File(datadir, "my.sock").getAbsolutePath();
     }
-    
+
     protected void waitForDatabaseReady() {
         try {
             waitingDatabaseOnLine();
@@ -72,22 +71,23 @@ public class MySQLInstance {
 
     private void setUpPassword() {
         password = generatePassword();
-        String[] args = {String.format("--socket=%s", getSockFile()), 
-                "-u", "root", "password", password};
-        
+        String[] args = { String.format("--socket=%s", getSockFile()), "-u", "root", "password", password };
+
         manager.invoker.invoke(manager.location(MySQLManager.MYSQL_MYSQLADMIN), args);
     }
-    
+
     public void createNewUser(String account, String passwd) throws Exception {
         runSqlScript(String.format("GRANT ALL PRIVILEGES ON *.* TO '%s'@'%%' IDENTIFIED BY '%s';", account, passwd));
-        runSqlScript(String.format("GRANT ALL PRIVILEGES ON *.* TO '%s'@'127.0.0.1' IDENTIFIED BY '%s';", account, passwd));
-        runSqlScript(String.format("GRANT ALL PRIVILEGES ON *.* TO '%s'@'localhost' IDENTIFIED BY '%s';", account, passwd));
+        runSqlScript(String.format("GRANT ALL PRIVILEGES ON *.* TO '%s'@'127.0.0.1' IDENTIFIED BY '%s';", account,
+                passwd));
+        runSqlScript(String.format("GRANT ALL PRIVILEGES ON *.* TO '%s'@'localhost' IDENTIFIED BY '%s';", account,
+                passwd));
     }
-    
+
     public void createDatabase(String name) throws Exception {
         runSqlScript(String.format("CREATE DATABASE `%s` DEFAULT CHARACTER SET utf8;", name));
     }
-    
+
     private String generatePassword() {
 
         StringBuilder sb = new StringBuilder();
@@ -103,10 +103,10 @@ public class MySQLInstance {
     }
 
     protected void waitingDatabaseOnLine() throws Exception {
-        int count = 15;
-        while (count-- > 0) {
+        long startTime = System.currentTimeMillis();
+        while (keepWait(startTime)) {
             if (!isDatabaseNetworkOn()) {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } else {
                 break;
             }
@@ -114,6 +114,12 @@ public class MySQLInstance {
         if (!isDatabaseNetworkOn()) {
             throw new RuntimeException("Can not connect to database.");
         }
+        logger.info("wait for db in " + (System.currentTimeMillis() - startTime) + " ms.");
+    }
+
+    private boolean keepWait(long startTime) {
+        long seconds = (System.currentTimeMillis() - startTime) / 1000;
+        return seconds < manager.getMaxWaitForDBInSeconds();
     }
 
     protected boolean isDatabaseNetworkOn() throws IOException {
@@ -126,29 +132,27 @@ public class MySQLInstance {
             return false;
         }
     }
-    
+
     public void shutdown() {
         manager.invoker.invoke(manager.location(MySQLManager.MYSQL_MYSQLADMIN),
-                String.format("--socket=%s", getSockFile()),
-                "-p" + password,
-                "-u", "root", "shutdown");
+                String.format("--socket=%s", getSockFile()), "-p" + password, "-u", "root", "shutdown");
     }
 
     public String getBaseConnectionUrl() {
         return String.format("jdbc:mysql://127.0.0.1:%d", getPort());
     }
-    
+
     public String getAddress() {
         return String.format("127.0.0.1:%d", getPort());
     }
-    
+
     public void runSqlScript(String sql) throws Exception {
         String sqlPath = saveInTempFile(sql);
         String cmd = String.format("%s -uroot -p%s --socket=%s < %s",
                 manager.location(MySQLManager.MYSQL_MYSQL_CLIENT), password, getSockFile(), sqlPath);
         manager.invoker.delegateInvoke(cmd);
     }
-    
+
     private String saveInTempFile(String sql) throws Exception {
         File file = File.createTempFile(MySQLInstance.class.getSimpleName(), ".tmp");
         FileWriter fw = new FileWriter(file);

@@ -17,6 +17,8 @@ public class MySQLManager {
     public static final String MYSQL_MYSQLADMIN = "bin/mysqladmin";
     public static final String MYSQL_MYSQL_CLIENT = "bin/mysql";
 
+    private long maxWaitForDBInSeconds = 60;
+
     protected ExternalApplicationInvoker invoker;
     private File mysqlPath;
     private Set<MySQLInstance> instances = new HashSet<MySQLInstance>();
@@ -24,7 +26,7 @@ public class MySQLManager {
     public MySQLManager(File mysqlPath) {
         this.mysqlPath = mysqlPath;
         this.invoker = new ExternalApplicationInvoker(mysqlPath);
-        
+
         validateOperatorSystem();
         validateMySQLTools();
     }
@@ -34,7 +36,7 @@ public class MySQLManager {
         checkExecutable(location(MYSQL_MYSQLD_SAFE));
         checkExecutable(location(MYSQL_MYSQLADMIN));
     }
-    
+
     public void validateOperatorSystem() {
         if (System.getProperty("os.name") != null) {
             if (System.getProperty("os.name").toLowerCase().contains("windows")) {
@@ -93,6 +95,14 @@ public class MySQLManager {
                 logger.error(e.getMessage(), e);
             }
         }
+    }
+
+    public long getMaxWaitForDBInSeconds() {
+        return maxWaitForDBInSeconds;
+    }
+
+    public void setMaxWaitForDBInSeconds(long maxWaitForDBInSeconds) {
+        this.maxWaitForDBInSeconds = maxWaitForDBInSeconds;
     }
 
 }
