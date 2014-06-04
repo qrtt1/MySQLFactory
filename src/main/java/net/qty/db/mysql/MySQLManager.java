@@ -55,11 +55,15 @@ public class MySQLManager {
     protected File location(String executable) {
         return new File(mysqlPath, executable);
     }
+    
+    public MySQLInstance createDatebase() {
+        return createDatabase(null);
+    }
 
-    public MySQLInstance createDatabase() {
+    public MySQLInstance createDatabase(File myCnf) {
         File datadir = prepareDatadir();
         instalMySQLData(datadir);
-        MySQLInstance instance = launchMySQLInstance(datadir);
+        MySQLInstance instance = launchMySQLInstance(myCnf, datadir);
         instances.add(instance);
         return instance;
     }
@@ -80,8 +84,8 @@ public class MySQLManager {
         invoker.invoke(location(MYSQL_INSTALL_SCRIPT), dataDirArgs);
     }
 
-    private MySQLInstance launchMySQLInstance(File datadir) {
-        MySQLInstance instance = new MySQLInstance(this, datadir);
+    private MySQLInstance launchMySQLInstance(File myCnf, File datadir) {
+        MySQLInstance instance = new MySQLInstance(this, myCnf, datadir);
         invoker.detachableInvoke(location(MYSQL_MYSQLD_SAFE), instance.getLaunchArgs());
         instance.waitForDatabaseReady();
         return instance;

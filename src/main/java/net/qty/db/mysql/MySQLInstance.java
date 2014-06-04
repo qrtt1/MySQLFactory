@@ -1,8 +1,10 @@
 package net.qty.db.mysql;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -16,12 +18,14 @@ public class MySQLInstance {
 
     private MySQLManager manager;
     private File datadir;
+    private File mysqlConfiguration;
     private String password;
     private int port;
 
-    public MySQLInstance(MySQLManager manager, File datadir) {
+    public MySQLInstance(MySQLManager manager, File mysqlConfiguration, File datadir) {
         this.manager = manager;
         this.datadir = datadir;
+        this.mysqlConfiguration = mysqlConfiguration;
         port = availablePort();
         logger.info("assign port number: " + port);
     }
@@ -46,9 +50,40 @@ public class MySQLInstance {
 
     protected String[] getLaunchArgs() {
         return new String[] { 
+                String.format("--defaults-file=%s", getMySQLConfigurationFile()),
                 String.format("--datadir=%s", datadir.getAbsoluteFile()),
                 String.format("--port=%d", getPort()), String.format("--socket=%s", getSockFile()),
                 String.format("--thread_stack=%s", "262144") };
+    }
+
+    private String getMySQLConfigurationFile() {
+        if (mysqlConfiguration != null && mysqlConfiguration.isFile()) {
+            return mysqlConfiguration.getAbsolutePath();
+        }
+
+        return createDefaultMySQLConfiguration();
+    }
+
+    private String createDefaultMySQLConfiguration() {
+        try {
+            File file = File.createTempFile("mysql-instance", "cnf");
+            FileOutputStream out = new FileOutputStream(file);
+            byte[] buffer = new byte[1024];
+            InputStream in = MySQLInstance.class.getResourceAsStream("/DEFAULT_MYSQL_CONFIGURATION");
+            while (true) {
+                int count = in.read(buffer);
+                if (count == -1) {
+                    break;
+                }
+                out.write(buffer, 0, count);
+            }
+            in.close();
+            out.close();
+            
+            return file.getAbsolutePath();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public int getPort() {

@@ -13,7 +13,7 @@ public class MySQLManagerTest extends AbsMysqlFactoryTestCase {
 
     @Test
     public void testCreateMySQLInstance() throws Exception {
-        MySQLInstance instance = manager.createDatabase();
+        MySQLInstance instance = manager.createDatabase(null);
 
         SqlHelper helper = new SqlHelper(instance.getBaseConnectionUrl(), "root", instance.getPassword());
         Map<String, Object> map = helper.exeucteOneResultQuery("SELECT NOW() AS WHAT_TIME_IS_IT");

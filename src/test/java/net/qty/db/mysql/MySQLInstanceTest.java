@@ -13,7 +13,7 @@ public class MySQLInstanceTest extends AbsMysqlFactoryTestCase {
 
     @Test
     public void testRunSqlScript() throws Exception {
-        MySQLInstance instance = manager.createDatabase();
+        MySQLInstance instance = manager.createDatabase(null);
         final String dbName = "test_" + ((int) (Math.random() * 1000));
         instance.createDatabase(dbName);
 
