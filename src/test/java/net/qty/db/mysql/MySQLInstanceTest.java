@@ -32,5 +32,17 @@ public class MySQLInstanceTest extends AbsMysqlFactoryTestCase {
 
         assertTrue(found);
     }
+    
+    @Test
+    public void testDefaultDatabase() throws Exception {
+        MySQLInstance instance = manager.createDatabase(null);
+        instance.setDefaultDatabase("test");
+        String tableName = "table_" + System.currentTimeMillis();
+        instance.runSqlScript("create table " + tableName + "(`column1` int);");
+        
+        SqlHelper helper = new SqlHelper(instance.getBaseConnectionUrl() + "/test", "root", instance.getPassword());
+        String resultTable = (String) helper.exeucteOneResultQuery("show tables").values().iterator().next();
+        assertEquals(tableName, resultTable);
+    }
 
 }

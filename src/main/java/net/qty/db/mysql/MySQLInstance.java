@@ -19,6 +19,7 @@ public class MySQLInstance {
     private MySQLManager manager;
     private File datadir;
     private File mysqlConfiguration;
+    private String defaultDatabase;
     private String password;
     private int port;
 
@@ -52,7 +53,8 @@ public class MySQLInstance {
         return new String[] { 
                 String.format("--defaults-file=%s", getMySQLConfigurationFile()),
                 String.format("--datadir=%s", datadir.getAbsoluteFile()),
-                String.format("--port=%d", getPort()), String.format("--socket=%s", getSockFile()),
+                String.format("--port=%d", getPort()), 
+                String.format("--socket=%s", getSockFile()),
                 String.format("--thread_stack=%s", "262144") };
     }
 
@@ -183,8 +185,11 @@ public class MySQLInstance {
 
     public void runSqlScript(String sql) throws Exception {
         String sqlPath = saveInTempFile(sql);
-        String cmd = String.format("%s -uroot -p%s --socket=%s < %s",
-                manager.location(MySQLManager.MYSQL_MYSQL_CLIENT), password, getSockFile(), sqlPath);
+        String cmd = String.format("%s -uroot -p%s --socket=%s %s < %s",
+                manager.location(MySQLManager.MYSQL_MYSQL_CLIENT), 
+                password, getSockFile(), 
+                defaultDatabase == null ? "" : defaultDatabase,
+                sqlPath);
         manager.invoker.delegateInvoke(cmd);
     }
 
@@ -198,6 +203,15 @@ public class MySQLInstance {
 
     public String getPassword() {
         return password;
+    }
+    
+    public void setDefaultDatabase(String defaultDatabase) {
+        if (defaultDatabase == null) {
+            this.defaultDatabase = "";
+            return;
+        }
+        
+        this.defaultDatabase = defaultDatabase;
     }
 
 }
